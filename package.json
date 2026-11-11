@@ -38,13 +38,13 @@
 		"node": ">=18.0.0"
 	},
 	"dependencies": {
-		"@companion-module/base": "^1.15.1",
+		"@companion-module/base": "^2.2.2",
 		"osc": "^2.4.5",
 		"ws": "^8.18.0"
 	},
 	"devDependencies": {
-		"@types/node": "^22.10.0",
+		"@types/node": "^26.6.6",
 		"@types/ws": "^8.5.13",
-		"typescript": "^5.7.2"
+		"typescript": "^7.0.2"
 	}
 }
