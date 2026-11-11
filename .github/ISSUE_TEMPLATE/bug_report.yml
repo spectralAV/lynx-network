@@ -1,0 +1,67 @@
+name: Bug report
+description: Report a reproducible module, wireless telemetry, OSC proxy, or Stream Deck preset bug.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. Please do not include private venue credentials or proprietary firmware files.
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      description: Example: v0.1.0-alpha.1 or a commit SHA.
+    validations:
+      required: true
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      options:
+        - Alpha State Stage Simulator (mock-hardware-stage.js)
+        - Bitfocus Companion v3 (Windows / macOS / Linux)
+        - CompanionOS / CompanionPi
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating system & hardware
+      placeholder: Windows 11 24H2, CompanionPi, DiGiCo S21, Sound Devices A20-Nexus, etc.
+    validations:
+      required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: Describe the bug and the expected behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+      placeholder: |
+        1. Run ...
+        2. Configure ...
+        3. Trigger action ...
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Companion or Simulator logs
+      description: Paste only non-sensitive logs.
+      render: shell
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-submit checks
+      options:
+        - label: I removed private network credentials and sensitive information.
+          required: true
+        - label: I searched existing issues.
+          required: true

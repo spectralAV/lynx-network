@@ -1,0 +1,20 @@
+name: Documentation update
+description: Report a gap or inaccuracy in the setup guide, OSC mapping tables, or architecture docs.
+title: "[Docs]: "
+labels:
+  - documentation
+body:
+  - type: input
+    id: doc-path
+    attributes:
+      label: Document or section
+      placeholder: README.md, docs/ARCHITECTURE.md, docs/installing-orchestrator.md
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Suggested improvement
+      description: Explain what should be clarified, corrected, or added.
+    validations:
+      required: true

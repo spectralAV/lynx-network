@@ -1,0 +1,25 @@
+name: Feature request
+description: Propose a new wireless receiver driver, DiGiCo OSC parameter, Mixing Station relay, or tactile control feature.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Live show workflow or problem
+      description: What live audio or RF engineering challenge does this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the desired action, feedback, variable, OSC path, or wireless driver behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: hardware
+    attributes:
+      label: Target hardware / firmware
+      placeholder: DiGiCo S21 / S31, Sound Devices A20-Nexus / ARX32, Shure AD4Q, Sennheiser EM 6000, Stream Deck + XL

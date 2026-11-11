@@ -1,0 +1,23 @@
+DiGiCo Astral Orchestrator (companion-module-digico-astral-orchestrator)
+Copyright 2026 SpectralAV
+
+This product includes software developed by SpectralAV.
+
+DiGiCo Astral Orchestrator is an independent open-source Bitfocus Companion
+module and network broker project. It is not affiliated with, endorsed by,
+sponsored by, or approved by DiGiCo UK Ltd., Sound Devices, LLC, Shure
+Incorporated, Sennheiser electronic GmbH & Co. KG, Corsair Memory, Inc.
+(Elgato), Bitfocus AS, or dev-core (Mixing Station).
+
+DiGiCo, S21, Sound Devices, Astral, A20-Nexus, ARX32, NexLink, Shure, Axient
+Digital, ShowLink, Sennheiser, Digital 6000, Elgato, Stream Deck, Bitfocus
+Companion, and Mixing Station are trademarks or registered trademarks of their
+respective owners. Any references to those products, OSC paths, or telemetry
+protocols are used solely for hardware interoperability, live audio show
+control, and simulation testing within this project.
+
+Third-party software dependencies retain their own notices and license terms.
+The Node.js dependency graph is recorded in package-lock.json. `@companion-module/base`,
+`ws`, `osc`, and TypeScript remain governed by their respective upstream
+open-source licenses.
+

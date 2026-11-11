@@ -1,0 +1,50 @@
+{
+	"name": "companion-module-digico-astral-orchestrator",
+	"version": "0.1.0-alpha.1",
+	"description": "Bitfocus Companion v3 module orchestrating Sound Devices Astral wireless telemetry, DiGiCo S21 UDP OSC proxy control, Mixing Station IEM client relays, and Stream Deck + XL Dual-Mode Panic workflows.",
+	"main": "dist/main.js",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/spectralAV/companion-module-digico-astral-orchestrator.git"
+	},
+	"bugs": {
+		"url": "https://github.com/spectralAV/companion-module-digico-astral-orchestrator/issues"
+	},
+	"homepage": "https://github.com/spectralAV/companion-module-digico-astral-orchestrator#readme",
+	"scripts": {
+		"build": "tsc",
+		"watch": "tsc -w",
+		"sim": "node mock-hardware-stage.js",
+		"sim:demo": "node mock-hardware-stage.js --demo",
+		"sim:once": "node mock-hardware-stage.js --duration 8",
+		"test": "npm run build && node --test dist/__tests__/orchestrator.test.js"
+	},
+	"keywords": [
+		"bitfocus-companion",
+		"companion-module",
+		"digico",
+		"digico-s21",
+		"sound-devices",
+		"astral",
+		"a20-nexus",
+		"arx32",
+		"mixing-station",
+		"osc",
+		"stream-deck"
+	],
+	"author": "SpectralAV",
+	"license": "Apache-2.0",
+	"engines": {
+		"node": ">=18.0.0"
+	},
+	"dependencies": {
+		"@companion-module/base": "^1.15.1",
+		"osc": "^2.4.5",
+		"ws": "^8.18.0"
+	},
+	"devDependencies": {
+		"@types/node": "^22.10.0",
+		"@types/ws": "^8.5.13",
+		"typescript": "^5.7.2"
+	}
+}

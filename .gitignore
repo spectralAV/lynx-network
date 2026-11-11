@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Compiled TypeScript output
+dist/
+build/
+
+# Logs & OS artifacts
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+
+# Local IDE & environment files
+.env
+.env.*
+!.env.example
+.vscode/
+.idea/
+*.tgz
+
