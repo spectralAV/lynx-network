@@ -1,0 +1,107 @@
+{
+	"schemaVersion": "1.0",
+	"profileName": "Lynx Network — DiGiCo S21 + Astral RF Telemetry (Generic OSC)",
+	"manufacturer": "SpectralAV / Lynx Network",
+	"targetConsole": "DiGiCo S21 / S31 (via Lynx Network UDP OSC Concentrator)",
+	"network": {
+		"protocol": "UDP",
+		"remotePort": 8001,
+		"localListenPort": 9000,
+		"handshakeCommand": {
+			"address": "/MixingStation/sync",
+			"typeTag": ",i",
+			"value": 1
+		}
+	},
+	"colorPalette": {
+		"2": { "name": "Operational (Green)", "hex": "#00B44B" },
+		"5": { "name": "Low Battery Warning <20% (Amber)", "hex": "#F59E0B" },
+		"6": { "name": "Capsule Clip / Critical Alert (Red)", "hex": "#DC2626" }
+	},
+	"oscMappings": {
+		"channelName": {
+			"addressPattern": "/Input_Channels/{ch}/Channel_Input/name",
+			"type": "s",
+			"direction": "inbound",
+			"description": "Restricted-slice scribble-strip label with live RF battery % (e.g. 'VOX1 84%')"
+		},
+		"channelColor": {
+			"addressPattern": "/Input_Channels/{ch}/Channel_Input/color",
+			"type": "i",
+			"direction": "inbound",
+			"description": "S-Series strip color index: 2=Green, 5=Amber (<20% batt), 6=Red (Clip/Critical)"
+		},
+		"auxIemSendLevel": {
+			"addressPattern": "/Input_Channels/{ch}/Aux_Send/{aux}/level",
+			"aliasPattern": "/MixingStation/bus/{aux}/ch/{ch}/level",
+			"type": "f",
+			"range": [-90.0, 10.0],
+			"unit": "dB",
+			"direction": "bidirectional",
+			"description": "Musician personal Aux IEM send level (governed by per-tablet @auxN firewall)"
+		},
+		"auxIemSendMute": {
+			"addressPattern": "/Input_Channels/{ch}/Aux_Send/{aux}/mute",
+			"aliasPattern": "/MixingStation/bus/{aux}/ch/{ch}/mute",
+			"type": "i",
+			"range": [0, 1],
+			"direction": "bidirectional",
+			"description": "Musician personal Aux IEM send mute"
+		},
+		"auxMasterLevel": {
+			"addressPattern": "/Aux_Outputs/{aux}/level",
+			"type": "f",
+			"range": [-90.0, 10.0],
+			"unit": "dB",
+			"direction": "bidirectional",
+			"description": "Musician overall IEM pack master level"
+		},
+		"wirelessBatteryPercent": {
+			"addressPattern": "/MixingStation/ch/{ch}/battery",
+			"type": "i",
+			"range": [0, 100],
+			"unit": "%",
+			"direction": "inbound"
+		},
+		"wirelessBatteryNormalizedBar": {
+			"addressPattern": "/MixingStation/ch/{ch}/battery_bar",
+			"type": "f",
+			"range": [0.0, 1.0],
+			"direction": "inbound",
+			"description": "Normalized 0.0-1.0 float for Mixing Station custom progress/meter bars"
+		},
+		"wirelessClipOverload": {
+			"addressPattern": "/MixingStation/ch/{ch}/clip",
+			"type": "i",
+			"range": [0, 1],
+			"direction": "inbound",
+			"description": "1 when transmitter capsule or preamp is clipping"
+		},
+		"wirelessNexLinkQuality": {
+			"addressPattern": "/MixingStation/ch/{ch}/nexlink",
+			"type": "i",
+			"range": [0, 100],
+			"unit": "%",
+			"direction": "inbound"
+		},
+		"wirelessStatusText": {
+			"addressPattern": "/MixingStation/ch/{ch}/status_text",
+			"type": "s",
+			"direction": "inbound",
+			"description": "Formatted RF health badge (e.g. '84% | NL:98%', '18% LOW BATT!', 'CLIP OVERLOAD!')"
+		},
+		"panicModeActive": {
+			"addressPattern": "/MixingStation/panic/active",
+			"type": "i",
+			"range": [0, 1],
+			"direction": "inbound",
+			"description": "1 while FOH pedal is stomped in Mode B Panic"
+		},
+		"panicTargetBanner": {
+			"addressPattern": "/MixingStation/panic/target_name",
+			"type": "s",
+			"direction": "inbound",
+			"description": "Displays 'PANIC: VOX1 (CH 1)' on tablet top banner during tech comms break-in"
+		}
+	}
+}

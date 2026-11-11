@@ -1,0 +1,158 @@
+{
+	"layoutName": "Lynx Network — Stage Musician Personal IEM Strip & RF Battery HUD",
+	"targetSurface": "iPad / Android Stage Tablet (Landscape 8-Channel Strip)",
+	"topBarWidgets": [
+		{
+			"type": "status_banner",
+			"label": "FOH TECH COMMS / PANIC STATUS",
+			"oscTextAddress": "/MixingStation/panic/target_name",
+			"oscAlertAddress": "/MixingStation/panic/active",
+			"activeColor": "#DC2626",
+			"idleColor": "#1E293B"
+		},
+		{
+			"type": "button",
+			"label": "SYNC CONSOLE & RF STATE",
+			"oscAddress": "/MixingStation/sync",
+			"pressValue": 1
+		}
+	],
+	"channelStrips": [
+		{
+			"channel": 1,
+			"defaultLabel": "VOX1",
+			"scribbleStrip": {
+				"nameOsc": "/Input_Channels/1/Channel_Input/name",
+				"colorOsc": "/Input_Channels/1/Channel_Input/color"
+			},
+			"rfTelemetryHud": {
+				"batteryBarOsc": "/MixingStation/ch/1/battery_bar",
+				"statusTextOsc": "/MixingStation/ch/1/status_text",
+				"clipLedOsc": "/MixingStation/ch/1/clip"
+			},
+			"iemSendFader": {
+				"levelOsc": "/Input_Channels/1/Aux_Send/1/level",
+				"muteOsc": "/Input_Channels/1/Aux_Send/1/mute"
+			}
+		},
+		{
+			"channel": 2,
+			"defaultLabel": "VOX2",
+			"scribbleStrip": {
+				"nameOsc": "/Input_Channels/2/Channel_Input/name",
+				"colorOsc": "/Input_Channels/2/Channel_Input/color"
+			},
+			"rfTelemetryHud": {
+				"batteryBarOsc": "/MixingStation/ch/2/battery_bar",
+				"statusTextOsc": "/MixingStation/ch/2/status_text",
+				"clipLedOsc": "/MixingStation/ch/2/clip"
+			},
+			"iemSendFader": {
+				"levelOsc": "/Input_Channels/2/Aux_Send/1/level",
+				"muteOsc": "/Input_Channels/2/Aux_Send/1/mute"
+			}
+		},
+		{
+			"channel": 3,
+			"defaultLabel": "VOX3",
+			"scribbleStrip": {
+				"nameOsc": "/Input_Channels/3/Channel_Input/name",
+				"colorOsc": "/Input_Channels/3/Channel_Input/color"
+			},
+			"rfTelemetryHud": {
+				"batteryBarOsc": "/MixingStation/ch/3/battery_bar",
+				"statusTextOsc": "/MixingStation/ch/3/status_text",
+				"clipLedOsc": "/MixingStation/ch/3/clip"
+			},
+			"iemSendFader": {
+				"levelOsc": "/Input_Channels/3/Aux_Send/1/level",
+				"muteOsc": "/Input_Channels/3/Aux_Send/1/mute"
+			}
+		},
+		{
+			"channel": 4,
+			"defaultLabel": "GTR1",
+			"scribbleStrip": {
+				"nameOsc": "/Input_Channels/4/Channel_Input/name",
+				"colorOsc": "/Input_Channels/4/Channel_Input/color"
+			},
+			"rfTelemetryHud": {
+				"batteryBarOsc": "/MixingStation/ch/4/battery_bar",
+				"statusTextOsc": "/MixingStation/ch/4/status_text",
+				"clipLedOsc": "/MixingStation/ch/4/clip"
+			},
+			"iemSendFader": {
+				"levelOsc": "/Input_Channels/4/Aux_Send/1/level",
+				"muteOsc": "/Input_Channels/4/Aux_Send/1/mute"
+			}
+		},
+		{
+			"channel": 5,
+			"defaultLabel": "BASS",
+			"scribbleStrip": {
+				"nameOsc": "/Input_Channels/5/Channel_Input/name",
+				"colorOsc": "/Input_Channels/5/Channel_Input/color"
+			},
+			"rfTelemetryHud": {
+				"batteryBarOsc": "/MixingStation/ch/5/battery_bar",
+				"statusTextOsc": "/MixingStation/ch/5/status_text",
+				"clipLedOsc": "/MixingStation/ch/5/clip"
+			},
+			"iemSendFader": {
+				"levelOsc": "/Input_Channels/5/Aux_Send/1/level",
+				"muteOsc": "/Input_Channels/5/Aux_Send/1/mute"
+			}
+		},
+		{
+			"channel": 6,
+			"defaultLabel": "HORN",
+			"scribbleStrip": {
+				"nameOsc": "/Input_Channels/6/Channel_Input/name",
+				"colorOsc": "/Input_Channels/6/Channel_Input/color"
+			},
+			"rfTelemetryHud": {
+				"batteryBarOsc": "/MixingStation/ch/6/battery_bar",
+				"statusTextOsc": "/MixingStation/ch/6/status_text",
+				"clipLedOsc": "/MixingStation/ch/6/clip"
+			},
+			"iemSendFader": {
+				"levelOsc": "/Input_Channels/6/Aux_Send/1/level",
+				"muteOsc": "/Input_Channels/6/Aux_Send/1/mute"
+			}
+		},
+		{
+			"channel": 7,
+			"defaultLabel": "HOST",
+			"scribbleStrip": {
+				"nameOsc": "/Input_Channels/7/Channel_Input/name",
+				"colorOsc": "/Input_Channels/7/Channel_Input/color"
+			},
+			"rfTelemetryHud": {
+				"batteryBarOsc": "/MixingStation/ch/7/battery_bar",
+				"statusTextOsc": "/MixingStation/ch/7/status_text",
+				"clipLedOsc": "/MixingStation/ch/7/clip"
+			},
+			"iemSendFader": {
+				"levelOsc": "/Input_Channels/7/Aux_Send/1/level",
+				"muteOsc": "/Input_Channels/7/Aux_Send/1/mute"
+			}
+		},
+		{
+			"channel": 8,
+			"defaultLabel": "SPARE",
+			"scribbleStrip": {
+				"nameOsc": "/Input_Channels/8/Channel_Input/name",
+				"colorOsc": "/Input_Channels/8/Channel_Input/color"
+			},
+			"rfTelemetryHud": {
+				"batteryBarOsc": "/MixingStation/ch/8/battery_bar",
+				"statusTextOsc": "/MixingStation/ch/8/status_text",
+				"clipLedOsc": "/MixingStation/ch/8/clip"
+			},
+			"iemSendFader": {
+				"levelOsc": "/Input_Channels/8/Aux_Send/1/level",
+				"muteOsc": "/Input_Channels/8/Aux_Send/1/mute"
+			}
+		}
+	]
+}

@@ -3,7 +3,9 @@ import { describe, it } from 'node:test'
 import { clearArmedChannel, executeSmartPedalStomp, setActiveChannel } from '../actions'
 import { DEFAULT_CONFIG, parseChannelMapping, parseMixingStationEndpoints } from '../config'
 import { computeS21ColorCode, DiGiCoAstralOrchestratorInstance, formatRestrictedS21Name } from '../main'
+import { MixingStationSessionManager } from '../mixing-station'
 import { decodeOscMessage, encodeOscMessage } from '../osc'
+import { SmartPedalHardwareController } from '../pedal'
 import { SennheiserD6000UdpDriver, ShureAxientTelnetDriver } from '../wireless'
 
 // Import the Alpha State Stage Simulator
@@ -58,15 +60,80 @@ describe('Lynx Network (lynx-network) Alpha Suite', () => {
 		assert.equal(computeS21ColorCode(8, false, 20, 10), 6)
 	})
 
-	it('parses Channel-to-Fader JSON mappings and Mixing Station endpoints', () => {
+	it('parses Channel-to-Fader JSON mappings and Mixing Station @auxN / @foh endpoints', () => {
 		const map = parseChannelMapping(JSON.stringify([{ rxId: 1, s21Channel: 1, label: 'VOX1', auxSend: 1 }]))
 		assert.equal(map.length, 1)
 		assert.equal(map[0].label, 'VOX1')
 
-		const endpoints = parseMixingStationEndpoints('192.168.1.50:9000, 192.168.1.51:9002')
-		assert.equal(endpoints.length, 2)
-		assert.deepEqual(endpoints[0], { host: '192.168.1.50', port: 9000 })
-		assert.deepEqual(endpoints[1], { host: '192.168.1.51', port: 9002 })
+		const endpoints = parseMixingStationEndpoints('192.168.1.50:9000@aux1, 192.168.1.51:9002@aux2, 192.168.1.99:9000@foh')
+		assert.equal(endpoints.length, 3)
+		assert.deepEqual(endpoints[0], { host: '192.168.1.50', port: 9000, allowedAuxBus: 1, role: 'iem' })
+		assert.deepEqual(endpoints[1], { host: '192.168.1.51', port: 9002, allowedAuxBus: 2, role: 'iem' })
+		assert.deepEqual(endpoints[2], { host: '192.168.1.99', port: 9000, allowedAuxBus: undefined, role: 'foh' })
+	})
+
+	it('enforces Mixing Station Stage Tablet Aux Bus Firewall and Mode B Panic-Lock Guard', () => {
+		const endpoints = parseMixingStationEndpoints('192.168.1.50:9000@aux1, 192.168.1.99:9000@foh')
+		const manager = new MixingStationSessionManager(endpoints, {
+			restrictTabletsToIemBuses: true,
+			talkbackChannel: 48,
+			techMatrixChannel: 1,
+		})
+
+		// 1. Musician Tablet 1 (@aux1) can adjust Aux 1 via alias or native S21 path
+		const allowedAux1 = manager.evaluateClientPacket(
+			{ address: '/MixingStation/bus/1/ch/3/level', args: [{ type: 'f', value: -3.5 }] },
+			'192.168.1.50',
+			9000,
+			null,
+			false
+		)
+		assert.equal(allowedAux1.allowed, true)
+		assert.equal(allowedAux1.targetAddress, '/Input_Channels/3/Aux_Send/1/level')
+
+		// 2. Musician Tablet 1 (@aux1) is blocked from modifying Aux 2
+		const blockedAux2 = manager.evaluateClientPacket(
+			{ address: '/Input_Channels/3/Aux_Send/2/level', args: [{ type: 'f', value: 0.0 }] },
+			'192.168.1.50',
+			9000,
+			null,
+			false
+		)
+		assert.equal(blockedAux2.allowed, false)
+
+		// 3. Musician Tablet 1 is blocked from modifying FOH Input Trim or Talkback Ch 48
+		const blockedTrim = manager.evaluateClientPacket(
+			{ address: '/Input_Channels/1/Channel_Input/trim', args: [{ type: 'f', value: 6.0 }] },
+			'192.168.1.50',
+			9000,
+			null,
+			false
+		)
+		assert.equal(blockedTrim.allowed, false)
+
+		// 4. Mode B Panic-Lock Guard blocks even @foh rover tablet from unmuting a panicked channel
+		const blockedPanicUnmute = manager.evaluateClientPacket(
+			{ address: '/Input_Channels/1/Channel_Input/mute', args: [{ type: 'i', value: 0 }] },
+			'192.168.1.99',
+			9000,
+			1, // Channel 1 armed
+			true // Pedal actively stomped
+		)
+		assert.equal(blockedPanicUnmute.allowed, false)
+		assert.match(blockedPanicUnmute.reason, /BLOCKED_BY_PANIC_LOCK/)
+	})
+
+	it('parses USB-MIDI CC64 Sustain Pedal and Keyboard events with polarity control', () => {
+		const transitions: boolean[] = []
+		const pedal = new SmartPedalHardwareController({
+			debounceMs: 0,
+			onPedalChange: (pressed) => transitions.push(pressed),
+		})
+
+		// CC 64 Down (127) -> true, Up (0) -> false
+		assert.equal(pedal.handleMidiMessage([0xb0, 64, 127]), true)
+		assert.equal(pedal.handleMidiMessage([0xb0, 64, 0]), false)
+		assert.deepEqual(transitions, [true, false])
 	})
 
 	it('parses Shure Axient Digital TCP and Sennheiser D6000 SSC UDP wireless telemetry frames', () => {
@@ -111,7 +178,7 @@ describe('Lynx Network (lynx-network) Alpha Suite', () => {
 				proxyListenPort: testProxyPort,
 				astralHost: '127.0.0.1',
 				astralPort: testAstralPort,
-				mixingStationClients: `127.0.0.1:${testTabletPort}`,
+				mixingStationClients: `127.0.0.1:${testTabletPort}@aux1`,
 			})
 
 			// Wait for initial Astral WebSocket connection and telemetry ingestion
@@ -142,12 +209,17 @@ describe('Lynx Network (lynx-network) Alpha Suite', () => {
 			assert.ok(ch3ColorMsg)
 			assert.equal(ch3ColorMsg.args[0].value, 6) // Red (Clipping)
 
-			// Verify Mixing Station Tablet received live battery telemetry relay
+			// Verify Mixing Station Tablet received live battery telemetry & normalized bar relay
 			const tabletBattMsg = stage.tabletReceivedLog.find(
 				(m: { address: string }) => m.address === '/MixingStation/ch/1/battery'
 			)
+			const tabletBarMsg = stage.tabletReceivedLog.find(
+				(m: { address: string }) => m.address === '/MixingStation/ch/1/battery_bar'
+			)
 			assert.ok(tabletBattMsg, 'Expected Mixing Station tablet to receive battery telemetry relay')
 			assert.equal(tabletBattMsg.args[0].value, 84)
+			assert.ok(tabletBarMsg, 'Expected Mixing Station tablet to receive normalized battery_bar float')
+			assert.equal(tabletBarMsg.args[0].value, 0.84)
 
 			// Verify Mode A: Comms Mode (activePanicTarget === null)
 			assert.equal(orchestrator.activePanicTarget, null)
@@ -216,4 +288,3 @@ describe('Lynx Network (lynx-network) Alpha Suite', () => {
 		}
 	})
 })
-

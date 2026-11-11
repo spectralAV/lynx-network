@@ -1,6 +1,7 @@
 import dgram from 'node:dgram'
 import { EventEmitter } from 'node:events'
 import { MixingStationEndpoint } from './config'
+import { TabletAclEvaluation } from './mixing-station'
 
 export type OscArgType = 'i' | 'f' | 's'
 
@@ -123,15 +124,17 @@ export interface ProxyBrokerOptions {
 	s21Port: number
 	proxyListenPort: number
 	mixingStationClients: MixingStationEndpoint[]
+	evaluateClientPacket?: (msg: DecodedOscMessage, rinfo: dgram.RemoteInfo) => TabletAclEvaluation
 	onLog?: (level: 'debug' | 'info' | 'warn' | 'error', msg: string) => void
 }
 
 /**
- * Multi-client UDP OSC Network Broker:
+ * Multi-client UDP OSC Network Broker (`DiGiCoOscProxyBroker`):
  * - Binds a single persistent UDP socket towards the DiGiCo S21 Console (Port 8000 default)
  *   to bypass the S-Series native single-controller limitation.
  * - Listens on a local proxy port (Port 8001 default) to intercept multiple Mixing Station tablets
- *   and Stream Deck controllers, piping them through the single console socket.
+ *   and Stream Deck controllers, evaluating each packet through the Mixing Station IEM Firewall &
+ *   Panic-Lock Guard before piping permitted commands through the single console socket.
  * - Relays mirrored, restricted OSC states and live wireless battery telemetry out to all
  *   registered Mixing Station stage tablets.
  */
@@ -184,17 +187,37 @@ export class DiGiCoOscProxyBroker extends EventEmitter {
 			this.proxySocket.on('message', (msg, rinfo) => {
 				// Register this remote tablet / controller dynamically for return relays
 				const key = `${rinfo.address}:${rinfo.port}`
-				if (!this.dynamicClients.has(key)) {
+				const isFirstContact = !this.dynamicClients.has(key)
+				if (isFirstContact) {
 					this.dynamicClients.set(key, { host: rinfo.address, port: rinfo.port })
 					this.log('info', `Registered remote Mixing Station / OSC client via proxy: ${key}`)
+					this.emit('tabletConnected', { host: rinfo.address, port: rinfo.port })
 				}
 
 				const decoded = decodeOscMessage(msg)
-				if (decoded) {
-					this.emit('clientProxyMessage', decoded, rinfo)
+				if (!decoded) return
+
+				if (this.options.evaluateClientPacket) {
+					const evalResult = this.options.evaluateClientPacket(decoded, rinfo)
+					if (evalResult.reason === 'SYNC_REQUEST') {
+						this.emit('tabletSyncRequested', { host: rinfo.address, port: rinfo.port })
+						return
+					}
+					if (!evalResult.allowed) {
+						this.log('warn', `[Mixing Station Firewall] ${evalResult.reason} (from ${key})`)
+						this.emit('clientPacketBlocked', evalResult, rinfo)
+						return
+					}
+
+					this.emit('clientProxyMessage', { address: evalResult.targetAddress, args: evalResult.targetArgs }, rinfo, evalResult)
+					const outPacket = encodeOscMessage(evalResult.targetAddress, evalResult.targetArgs)
+					if (this.consoleSocket && !this.closed) {
+						this.consoleSocket.send(outPacket, this.options.s21Port, this.options.s21Host)
+					}
+					return
 				}
 
-				// Pipe intercepted client packet through the single S21 socket connection
+				this.emit('clientProxyMessage', decoded, rinfo)
 				if (this.consoleSocket && !this.closed) {
 					this.consoleSocket.send(msg, this.options.s21Port, this.options.s21Host)
 				}
@@ -242,6 +265,16 @@ export class DiGiCoOscProxyBroker extends EventEmitter {
 		this.emit('relayedToTablets', { address, args })
 	}
 
+	/**
+	 * Sends a targeted OSC message to a single Mixing Station tablet endpoint (used for late-joining snapshot sync).
+	 */
+	public sendToTabletEndpoint(endpoint: { host: string; port: number }, address: string, args: OscArgument[] = []): void {
+		const sender = this.proxySocket ?? this.consoleSocket
+		if (!sender || this.closed) return
+		const packet = encodeOscMessage(address, args)
+		sender.send(packet, endpoint.port, endpoint.host)
+	}
+
 	private broadcastRawToTablets(packet: Buffer): void {
 		const sender = this.proxySocket ?? this.consoleSocket
 		if (!sender || this.closed) return
@@ -277,4 +310,3 @@ export class DiGiCoOscProxyBroker extends EventEmitter {
 		}
 	}
 }
-

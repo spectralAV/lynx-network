@@ -9,7 +9,9 @@ import {
 	parseMixingStationEndpoints,
 } from './config'
 import { GetFeedbacksList } from './feedbacks'
-import { DiGiCoOscProxyBroker } from './osc'
+import { MixingStationSessionManager } from './mixing-station'
+import { DecodedOscMessage, DiGiCoOscProxyBroker } from './osc'
+import { SmartPedalHardwareController } from './pedal'
 import { GetPresetsList } from './presets'
 import { BuildVariableValues, GetVariableDefinitions } from './variables'
 import { createWirelessDriver, WirelessChannelTelemetry, WirelessTelemetryDriver } from './wireless'
@@ -91,6 +93,8 @@ export class DiGiCoAstralOrchestratorInstance extends InstanceBase<ModuleConfig>
 
 	private oscBroker: DiGiCoOscProxyBroker | null = null
 	private wirelessDriver: WirelessTelemetryDriver | null = null
+	private mixingStationManager: MixingStationSessionManager | null = null
+	private pedalHardware: SmartPedalHardwareController | null = null
 	private flashTimer: NodeJS.Timeout | null = null
 	private channelStates: Map<number, ChannelOrchestratorState> = new Map()
 	private rxToS21Map: Map<number, number> = new Map()
@@ -98,6 +102,10 @@ export class DiGiCoAstralOrchestratorInstance extends InstanceBase<ModuleConfig>
 	public async init(config: ModuleConfig): Promise<void> {
 		this.config = { ...DEFAULT_CONFIG, ...config }
 		this.rebuildChannelStateIndex()
+
+		this.pedalHardware = new SmartPedalHardwareController({
+			onPedalChange: (isPressed) => this.executeSmartPedalStomp(isPressed),
+		})
 
 		this.updateActions()
 		this.updateFeedbacks()
@@ -202,13 +210,43 @@ export class DiGiCoAstralOrchestratorInstance extends InstanceBase<ModuleConfig>
 	public async startNetworkServices(): Promise<void> {
 		const tabletEndpoints = parseMixingStationEndpoints(this.config.mixingStationClients)
 
-		// 1. Start Outbound S21 UDP OSC Socket & Multi-Client Proxy Broker
+		this.mixingStationManager = new MixingStationSessionManager(tabletEndpoints, {
+			restrictTabletsToIemBuses: Boolean(this.config.restrictTabletsToIemBuses ?? true),
+			talkbackChannel: this.config.talkbackChannel || 48,
+			techMatrixChannel: this.config.techMatrixChannel || 1,
+		})
+
+		// 1. Start Outbound S21 UDP OSC Socket & Multi-Client Proxy Broker with Mixing Station Firewall
 		this.oscBroker = new DiGiCoOscProxyBroker({
 			s21Host: this.config.s21Host,
 			s21Port: this.config.s21Port,
 			proxyListenPort: this.config.proxyListenPort,
 			mixingStationClients: tabletEndpoints,
+			evaluateClientPacket: (msg, rinfo) =>
+				this.mixingStationManager!.evaluateClientPacket(
+					msg,
+					rinfo.address,
+					rinfo.port,
+					this.activePanicTarget,
+					this.pedalPressed
+				),
 			onLog: (level, msg) => this.log(level, msg),
+		})
+
+		this.oscBroker.on('clientProxyMessage', (msg: DecodedOscMessage) => {
+			this.ingestBidirectionalOscState(msg)
+		})
+
+		this.oscBroker.on('consoleMessage', (msg: DecodedOscMessage) => {
+			this.ingestBidirectionalOscState(msg)
+		})
+
+		this.oscBroker.on('tabletConnected', (ep: { host: string; port: number }) => {
+			this.syncStateToTablet(ep)
+		})
+
+		this.oscBroker.on('tabletSyncRequested', (ep: { host: string; port: number }) => {
+			this.syncStateToTablet(ep)
 		})
 
 		await this.oscBroker.start()
@@ -231,6 +269,72 @@ export class DiGiCoAstralOrchestratorInstance extends InstanceBase<ModuleConfig>
 		this.wirelessDriver.start()
 	}
 
+	/**
+	 * Updates internal orchestrator state when a Mixing Station tablet or the DiGiCo S21 Console
+	 * modifies Aux IEM send levels, Input Trim, or Monitor levels, keeping Stream Deck + rotary dials in sync.
+	 */
+	private ingestBidirectionalOscState(msg: DecodedOscMessage): void {
+		const { address, args } = msg
+		const numVal = Number(args[0]?.value)
+		if (!Number.isFinite(numVal)) return
+
+		const auxMatch = address.match(/^\/Input_Channels\/(\d+)\/Aux_Send\/(\d+)\/level$/)
+		if (auxMatch) {
+			const chId = Number(auxMatch[1])
+			const state = this.getChannelState(chId)
+			state.auxIemSendDb = Number(numVal.toFixed(1))
+			this.syncVariables()
+			return
+		}
+
+		const trimMatch = address.match(/^\/Input_Channels\/(\d+)\/Channel_Input\/trim$/)
+		if (trimMatch) {
+			const chId = Number(trimMatch[1])
+			const state = this.getChannelState(chId)
+			state.s21TrimDb = Number(numVal.toFixed(1))
+			this.syncVariables()
+			return
+		}
+
+		if (address === '/Control_Room/Monitor/level') {
+			this.localMonitorCueDb = Number(numVal.toFixed(1))
+			this.syncVariables()
+		}
+	}
+
+	/**
+	 * Pushes a complete cached state snapshot (scribble names, strip colors, battery bars, Aux IEM levels,
+	 * and active Panic status) to a newly connected or syncing Mixing Station stage tablet.
+	 */
+	public syncStateToTablet(endpoint: { host: string; port: number }): void {
+		if (!this.oscBroker) return
+		for (const entry of this.channelMapping) {
+			const st = this.getChannelState(entry.s21Channel)
+			const ch = entry.s21Channel
+			this.oscBroker.sendToTabletEndpoint(endpoint, `/Input_Channels/${ch}/Channel_Input/name`, [
+				{ type: 's', value: st.s21DisplayName },
+			])
+			this.oscBroker.sendToTabletEndpoint(endpoint, `/Input_Channels/${ch}/Channel_Input/color`, [
+				{ type: 'i', value: st.s21ColorCode },
+			])
+			this.oscBroker.sendToTabletEndpoint(endpoint, `/Input_Channels/${ch}/Aux_Send/${st.auxSend}/level`, [
+				{ type: 'f', value: st.auxIemSendDb },
+			])
+			this.oscBroker.sendToTabletEndpoint(endpoint, `/MixingStation/ch/${ch}/battery`, [
+				{ type: 'i', value: st.batteryPercent },
+			])
+			this.oscBroker.sendToTabletEndpoint(endpoint, `/MixingStation/ch/${ch}/battery_bar`, [
+				{ type: 'f', value: Number((st.batteryPercent / 100).toFixed(2)) },
+			])
+			this.oscBroker.sendToTabletEndpoint(endpoint, `/MixingStation/ch/${ch}/clip`, [
+				{ type: 'i', value: st.clip ? 1 : 0 },
+			])
+			this.oscBroker.sendToTabletEndpoint(endpoint, `/MixingStation/ch/${ch}/nexlink`, [
+				{ type: 'i', value: st.nexLinkQuality },
+			])
+		}
+	}
+
 	public async stopNetworkServices(): Promise<void> {
 		if (this.wirelessDriver) {
 			await this.wirelessDriver.stop()
@@ -244,7 +348,7 @@ export class DiGiCoAstralOrchestratorInstance extends InstanceBase<ModuleConfig>
 
 	/**
 	 * Core Orchestrator Loop:
-	 * Ingests a parsed Sound Devices Astral telemetry frame and maps it to:
+	 * Ingests a parsed Sound Devices Astral / Shure / Sennheiser telemetry frame and maps it to:
 	 * A) Inbound S21 Channel Name text strings with restricted slicing ("/Input_Channels/{id}/Channel_Input/name" -> "VOX1 84%")
 	 * B) S21 S-Series local channel strip color codes ("/Input_Channels/{id}/Channel_Input/color" -> 2 Green, 5 Amber <20%, 6 Red clip)
 	 * C) Live OSC relays back to connected Mixing Station client tablet IPs
@@ -287,14 +391,26 @@ export class DiGiCoAstralOrchestratorInstance extends InstanceBase<ModuleConfig>
 			)
 
 			// C) Relay dedicated wireless telemetry OSC state paths to Mixing Station client tablets
+			const statusText = state.clip
+				? 'CLIP OVERLOAD!'
+				: state.batteryPercent < this.config.lowBatteryThreshold
+					? `${state.batteryPercent}% LOW BATT!`
+					: `${state.batteryPercent}% | NL:${state.nexLinkQuality}%`
+
 			this.oscBroker.relayToMixingStationTablets(`/MixingStation/ch/${s21Channel}/battery`, [
 				{ type: 'i', value: state.batteryPercent },
+			])
+			this.oscBroker.relayToMixingStationTablets(`/MixingStation/ch/${s21Channel}/battery_bar`, [
+				{ type: 'f', value: Number((state.batteryPercent / 100).toFixed(2)) },
 			])
 			this.oscBroker.relayToMixingStationTablets(`/MixingStation/ch/${s21Channel}/clip`, [
 				{ type: 'i', value: state.clip ? 1 : 0 },
 			])
 			this.oscBroker.relayToMixingStationTablets(`/MixingStation/ch/${s21Channel}/nexlink`, [
 				{ type: 'i', value: state.nexLinkQuality },
+			])
+			this.oscBroker.relayToMixingStationTablets(`/MixingStation/ch/${s21Channel}/status_text`, [
+				{ type: 's', value: statusText },
 			])
 		}
 
@@ -398,6 +514,17 @@ export class DiGiCoAstralOrchestratorInstance extends InstanceBase<ModuleConfig>
 				[{ type: 'i', value: matrixMuteValue }],
 				true
 			)
+
+			// Notify Mixing Station tablets of active Panic state
+			this.oscBroker?.relayToMixingStationTablets('/MixingStation/panic/active', [
+				{ type: 'i', value: this.pedalPressed ? 1 : 0 },
+			])
+			this.oscBroker?.relayToMixingStationTablets('/MixingStation/panic/target_name', [
+				{
+					type: 's',
+					value: this.pedalPressed ? `PANIC: ${state.baseLabel} (CH ${targetChan})` : 'NONE',
+				},
+			])
 
 			this.log(
 				'info',
@@ -506,10 +633,13 @@ export class DiGiCoAstralOrchestratorInstance extends InstanceBase<ModuleConfig>
 	public getWirelessDriver(): WirelessTelemetryDriver | null {
 		return this.wirelessDriver
 	}
+
+	public getPedalHardware(): SmartPedalHardwareController | null {
+		return this.pedalHardware
+	}
 }
 
 // Only invoke Companion IPC entrypoint when launched as a Companion plugin process
 if (require.main === module && typeof process.send === 'function') {
 	runEntrypoint(DiGiCoAstralOrchestratorInstance, [])
 }
-

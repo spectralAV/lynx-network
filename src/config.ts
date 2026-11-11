@@ -18,6 +18,10 @@ export interface ChannelMappingEntry {
 export interface MixingStationEndpoint {
 	host: string
 	port: number
+	/** Optional Aux IEM bus pin (e.g. 192.168.1.51:9000@aux1 restricts tablet to Aux Bus 1 only) */
+	allowedAuxBus?: number
+	/** Tablet role: 'iem' (stage musician, restricted to Aux IEM buses) or 'foh' (FOH rover engineer iPad) */
+	role?: 'iem' | 'foh'
 }
 
 export interface ModuleConfig {
@@ -28,6 +32,7 @@ export interface ModuleConfig {
 	astralPort: number
 	wirelessProtocol: WirelessProtocolType
 	mixingStationClients: string
+	restrictTabletsToIemBuses: boolean
 	channelMapJson: string
 	talkbackChannel: number
 	techMatrixChannel: number
@@ -54,7 +59,8 @@ export const DEFAULT_CONFIG: ModuleConfig = {
 	astralHost: '127.0.0.1',
 	astralPort: 8080,
 	wirelessProtocol: 'astral_ws',
-	mixingStationClients: '127.0.0.1:9000',
+	mixingStationClients: '127.0.0.1:9000@aux1',
+	restrictTabletsToIemBuses: true,
 	channelMapJson: JSON.stringify(DEFAULT_CHANNEL_MAP, null, 2),
 	talkbackChannel: 48,
 	techMatrixChannel: 1,
@@ -121,7 +127,11 @@ export function parseChannelMapping(rawJson: string | undefined): ChannelMapping
 }
 
 /**
- * Parses comma-separated or JSON list of Mixing Station tablet endpoints (e.g. "192.168.1.50:9000, 192.168.1.51:9000")
+ * Parses comma-separated or JSON list of Mixing Station tablet endpoints.
+ * Supports optional bus pinning and role suffixes:
+ *   - `192.168.1.50:9000@aux1` (Stage Musician Tablet pinned to Aux Bus 1)
+ *   - `192.168.1.51:9000@aux2` (Stage Musician Tablet pinned to Aux Bus 2)
+ *   - `192.168.1.99:9000@foh`  (FOH Rover Engineer iPad with full console control)
  */
 export function parseMixingStationEndpoints(raw: string | undefined): MixingStationEndpoint[] {
 	if (!raw || !raw.trim()) {
@@ -142,6 +152,8 @@ export function parseMixingStationEndpoints(raw: string | undefined): MixingStat
 							return {
 								host: entry.host.trim(),
 								port: Number(entry.port) || 9000,
+								allowedAuxBus: entry.allowedAuxBus !== undefined ? Number(entry.allowedAuxBus) : undefined,
+								role: entry.role === 'foh' ? ('foh' as const) : ('iem' as const),
 							}
 						}
 						return null
@@ -162,13 +174,35 @@ export function parseMixingStationEndpoints(raw: string | undefined): MixingStat
 function parseSingleEndpoint(token: string): MixingStationEndpoint | null {
 	const cleaned = token.trim()
 	if (!cleaned) return null
-	const [hostPart, portPart] = cleaned.split(':')
+
+	const [addrPart, roleTag] = cleaned.split('@')
+	const [hostPart, portPart] = (addrPart ?? '').split(':')
 	const host = hostPart?.trim()
 	if (!host) return null
+
 	const port = portPart ? Number(portPart.trim()) : 9000
+	const validPort = Number.isFinite(port) && port > 0 && port <= 65535 ? port : 9000
+
+	let allowedAuxBus: number | undefined
+	let role: 'iem' | 'foh' = 'iem'
+
+	if (roleTag) {
+		const normRole = roleTag.trim().toLowerCase()
+		if (normRole === 'foh' || normRole === 'admin' || normRole === 'full') {
+			role = 'foh'
+		} else {
+			const auxMatch = normRole.match(/^(?:aux|bus|iem)?(\d+)$/)
+			if (auxMatch) {
+				allowedAuxBus = Number(auxMatch[1])
+			}
+		}
+	}
+
 	return {
 		host,
-		port: Number.isFinite(port) && port > 0 && port <= 65535 ? port : 9000,
+		port: validPort,
+		allowedAuxBus,
+		role,
 	}
 }
 
@@ -181,9 +215,9 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
 			type: 'static-text',
 			id: 'info_header',
 			width: 12,
-			label: 'Network Broker & Hardware Endpoints',
+			label: 'Lynx Network — Pro-AV Console & RF Telemetry Broker',
 			value:
-				'Configures the single-socket UDP OSC proxy to the DiGiCo S21 Console, the inbound Sound Devices Astral WebSocket telemetry client, and outbound Mixing Station stage tablet relays.',
+				'Configures the single-socket UDP OSC concentrator to the DiGiCo S21 Console, the inbound Sound Devices Astral / Shure / Sennheiser wireless telemetry client, and the Mixing Station stage tablet IEM firewall.',
 		},
 		{
 			type: 'textinput',
@@ -205,7 +239,7 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
 		{
 			type: 'number',
 			id: 'proxyListenPort',
-			label: 'Local Multi-Client OSC Proxy Listen Port (Intercepts Mixing Station / Remote Decks)',
+			label: 'Local Multi-Client OSC Proxy Listen Port (Point Mixing Station Tablets Here)',
 			width: 6,
 			default: DEFAULT_CONFIG.proxyListenPort,
 			min: 1024,
@@ -219,8 +253,8 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
 			default: DEFAULT_CONFIG.wirelessProtocol,
 			choices: [
 				{ id: 'astral_ws', label: 'Sound Devices Astral (A20-Nexus / ARX32) — WebSocket JSON' },
-				{ id: 'shure_axient_tcp', label: 'Shure Axient Digital — Telnet TCP (Abstract Driver)' },
-				{ id: 'sennheiser_d6000_udp', label: 'Sennheiser Digital 6000 — UDP (Abstract Driver)' },
+				{ id: 'shure_axient_tcp', label: 'Shure Axient Digital (AD4D / AD4Q) — Telnet TCP :2202' },
+				{ id: 'sennheiser_d6000_udp', label: 'Sennheiser Digital 6000 (EM 6000) — SSC UDP' },
 			],
 		},
 		{
@@ -243,9 +277,16 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
 		{
 			type: 'textinput',
 			id: 'mixingStationClients',
-			label: 'Mixing Station Stage Tablet IPs (Comma-separated IP:Port list)',
-			width: 12,
+			label: 'Mixing Station Stage Tablet Endpoints (Supports IP:Port@auxN or @foh)',
+			width: 8,
 			default: DEFAULT_CONFIG.mixingStationClients,
+		},
+		{
+			type: 'checkbox',
+			id: 'restrictTabletsToIemBuses',
+			label: 'Stage Tablet Firewall: Restrict Musician Tablets to Aux IEM Sends Only',
+			width: 4,
+			default: DEFAULT_CONFIG.restrictTabletsToIemBuses,
 		},
 		{
 			type: 'textinput',
@@ -301,4 +342,3 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
 		},
 	]
 }
-
