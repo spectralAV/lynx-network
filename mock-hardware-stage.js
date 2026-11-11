@@ -2,7 +2,7 @@
 /**
  * ============================================================================
  * ALPHA STATE STAGE SIMULATOR (mock-hardware-stage.js)
- * Project: companion-module-digico-astral-orchestrator
+ * Project: Lynx Network (lynx-network)
  *
  * Emulates physical stage hardware for Alpha-phase verification:
  *  1. Sound Devices Astral (A20-Nexus / ARX32) WebSocket Server (Default :8080)

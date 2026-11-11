@@ -1,5 +1,5 @@
 param(
-    [string]$TargetDir = "$HOME\companion-module-dev\companion-module-digico-astral-orchestrator"
+    [string]$TargetDir = "$HOME\companion-module-dev\lynx-network"
 )
 
 $ErrorActionPreference = 'Stop'
@@ -7,7 +7,7 @@ $RepoRoot = Resolve-Path "$PSScriptRoot\.."
 
 Push-Location $RepoRoot
 try {
-    Write-Host "Building companion-module-digico-astral-orchestrator..." -ForegroundColor Cyan
+    Write-Host "Building lynx-network..." -ForegroundColor Cyan
     npm run build
 
     $ParentDir = Split-Path -Parent $TargetDir
@@ -25,7 +25,7 @@ try {
     Copy-Item -Path "$RepoRoot\node_modules" -Destination "$TargetDir\node_modules" -Recurse -Force
     Copy-Item -Path "$RepoRoot\package.json" -Destination "$TargetDir\package.json" -Force
 
-    Write-Host "[OK] Installed module to $TargetDir" -ForegroundColor Green
+    Write-Host "[OK] Installed Lynx Network module to $TargetDir" -ForegroundColor Green
 } finally {
     Pop-Location
 }

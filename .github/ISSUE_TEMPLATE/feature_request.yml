@@ -23,3 +23,4 @@ body:
     attributes:
       label: Target hardware / firmware
       placeholder: DiGiCo S21 / S31, Sound Devices A20-Nexus / ARX32, Shure AD4Q, Sennheiser EM 6000, Stream Deck + XL
+

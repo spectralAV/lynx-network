@@ -1,16 +1,16 @@
 {
-	"name": "companion-module-digico-astral-orchestrator",
+	"name": "lynx-network",
 	"version": "0.1.0-alpha.1",
-	"description": "Bitfocus Companion v3 module orchestrating Sound Devices Astral wireless telemetry, DiGiCo S21 UDP OSC proxy control, Mixing Station IEM client relays, and Stream Deck + XL Dual-Mode Panic workflows.",
+	"description": "Lynx Network — Bitfocus Companion v3 module orchestrating Sound Devices Astral wireless telemetry, DiGiCo S21 UDP OSC proxy control, Mixing Station IEM client relays, and Stream Deck + XL Dual-Mode Panic workflows.",
 	"main": "dist/main.js",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/spectralAV/companion-module-digico-astral-orchestrator.git"
+		"url": "https://github.com/spectralAV/lynx-network.git"
 	},
 	"bugs": {
-		"url": "https://github.com/spectralAV/companion-module-digico-astral-orchestrator/issues"
+		"url": "https://github.com/spectralAV/lynx-network/issues"
 	},
-	"homepage": "https://github.com/spectralAV/companion-module-digico-astral-orchestrator#readme",
+	"homepage": "https://github.com/spectralAV/lynx-network#readme",
 	"scripts": {
 		"build": "tsc",
 		"watch": "tsc -w",
@@ -20,6 +20,7 @@
 		"test": "npm run build && node --test dist/__tests__/orchestrator.test.js"
 	},
 	"keywords": [
+		"lynx-network",
 		"bitfocus-companion",
 		"companion-module",
 		"digico",

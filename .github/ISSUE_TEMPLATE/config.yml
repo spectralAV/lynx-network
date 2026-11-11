@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Support guide
-    url: https://github.com/spectralAV/companion-module-digico-astral-orchestrator/blob/main/docs/support.md
+    url: https://github.com/spectralAV/lynx-network/blob/main/docs/support.md
     about: Read what to include in a useful support or hardware diagnostics issue.
   - name: Security policy
-    url: https://github.com/spectralAV/companion-module-digico-astral-orchestrator/blob/main/SECURITY.md
+    url: https://github.com/spectralAV/lynx-network/blob/main/SECURITY.md
     about: Report vulnerabilities privately. Do not post exploit details publicly.

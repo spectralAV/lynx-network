@@ -1,6 +1,6 @@
 # Security Policy
 
-`companion-module-digico-astral-orchestrator` is a local-network show-control broker for live production environments. Security reports are welcome, especially around UDP OSC proxy packet handling, WebSocket/TCP telemetry ingestion, denial-of-service resilience on stage networks, and dependency vulnerabilities.
+**Lynx Network** (`lynx-network`) is a local-network show-control broker for live production environments. Security reports are welcome, especially around UDP OSC proxy packet handling, WebSocket/TCP telemetry ingestion, denial-of-service resilience on stage networks, and dependency vulnerabilities.
 
 ## Supported Versions
 
@@ -34,4 +34,3 @@ Out of scope:
 
 - Unencrypted UDP OSC or Telnet protocols inherent to third-party mixing consoles and wireless receivers on an isolated production VLAN.
 - Issues requiring physical access to an unlocked FOH control surface.
-

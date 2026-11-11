@@ -16,3 +16,10 @@ updates:
       root-npm:
         patterns:
           - "*"
+    ignore:
+      - dependency-name: "@companion-module/base"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]

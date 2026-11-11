@@ -1,6 +1,6 @@
-# Contributing To DiGiCo Astral Orchestrator
+# Contributing To Lynx Network
 
-Thanks for helping make `companion-module-digico-astral-orchestrator` better. This project is currently in public alpha with full hardware stage simulation, so the most useful contributions are focused, reproducible, and easy to verify against `mock-hardware-stage.js` or physical stage consoles.
+Thanks for helping make **Lynx Network** (`lynx-network`) better. This project is currently in public alpha with full hardware stage simulation, so the most useful contributions are focused, reproducible, and easy to verify against `mock-hardware-stage.js` or physical stage consoles.
 
 ## Development Setup
 
@@ -53,4 +53,3 @@ npm run sim
 - [ ] `node mock-hardware-stage.js --demo` completes cleanly.
 - [ ] Docs are updated when behavior, OSC addresses, or configuration fields change.
 - [ ] No private network credentials, tokens, or proprietary firmware files are included.
-

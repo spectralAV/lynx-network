@@ -1,6 +1,6 @@
 $ErrorActionPreference = 'Stop'
 
-Write-Host "=== DiGiCo Astral Orchestrator: Environment Validation ===" -ForegroundColor Cyan
+Write-Host "=== Lynx Network: Environment Validation ===" -ForegroundColor Cyan
 
 $nodeVersion = & node -v 2>$null
 $npmVersion = & npm -v 2>$null
@@ -24,3 +24,4 @@ if (Test-Path "$PSScriptRoot\..\dist\main.js") {
         Pop-Location
     }
 }
+

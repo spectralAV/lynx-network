@@ -1,15 +1,15 @@
 <p align="center">
-  <img src="assets/orchestrator-icon.svg" width="128" alt="DiGiCo Astral Orchestrator icon">
+  <img src="assets/orchestrator-icon.svg" width="128" alt="Lynx Network icon">
 </p>
 
-<h1 align="center">DiGiCo Astral Orchestrator</h1>
+<h1 align="center">Lynx Network</h1>
 
 <p align="center">
   <strong>Context-aware Bitfocus Companion v3 network broker uniting Sound Devices Astral wireless telemetry, DiGiCo S21 single-socket UDP OSC proxy control, Mixing Station stage tablet relays, and Stream Deck + XL Dual-Mode Panic workflows.</strong>
 </p>
 
 <p align="center">
-  <a href="https://github.com/spectralAV/companion-module-digico-astral-orchestrator/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/spectralAV/companion-module-digico-astral-orchestrator/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://github.com/spectralAV/lynx-network/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/spectralAV/lynx-network/actions/workflows/ci.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/license-Apache--2.0-blue"></a>
   <a href="https://streamelements.com/martianost/tip"><img alt="Tip on StreamElements" src="https://img.shields.io/badge/tip-StreamElements-9146FF"></a>
   <img alt="Bitfocus Companion" src="https://img.shields.io/badge/Bitfocus%20Companion-v3%2B%20%7C%20CompanionOS-e11d48">
@@ -29,7 +29,7 @@
   <a href="#community-and-support">Support</a>
 </p>
 
-`companion-module-digico-astral-orchestrator` is a smart, multi-client, context-aware network broker built for live production and touring audio engineers running **Bitfocus Companion / CompanionOS**. It ingests real-time wireless receiver telemetry from **Sound Devices Astral (A20-Nexus / ARX32)** over WebSocket (with extensible drivers for **Shure Axient Digital** TCP and **Sennheiser Digital 6000** UDP), multiplexes multiple **Mixing Station** tablets and **Stream Deck** surfaces through a single persistent UDP OSC socket to bypass the **DiGiCo S21** single-controller limitation, and drives a show-critical **Dual-Mode Panic Switch** (`activePanicTarget`) via a floor sustain pedal.
+**Lynx Network** (`lynx-network`) is a smart, multi-client, context-aware network broker built for live production and touring audio engineers running **Bitfocus Companion / CompanionOS**. It ingests real-time wireless receiver telemetry from **Sound Devices Astral (A20-Nexus / ARX32)** over WebSocket (with extensible drivers for **Shure Axient Digital** TCP and **Sennheiser Digital 6000** UDP), multiplexes multiple **Mixing Station** tablets and **Stream Deck** surfaces through a single persistent UDP OSC socket to bypass the **DiGiCo S21** single-controller limitation, and drives a show-critical **Dual-Mode Panic Switch** (`activePanicTarget`) via a floor sustain pedal.
 
 Planning and guides: [Install Guide](docs/installing-orchestrator.md) · [Architecture](docs/ARCHITECTURE.md) · [Roadmap to 1.0.0](docs/roadmap-1.0.md) · [Known Limitations](docs/known-limitations.md) · [Support Guide](docs/support.md)
 
@@ -74,8 +74,8 @@ npm run sim
        │ WebSocket JSON (:8080)       │ Single UDP OSC Socket (:8000)│ Relayed UDP OSC (:9000)
        ▼                              ▼                              ▼
 ┌─────────────────────┐    ┌──────────────────────────┐    ┌────────────────────────┐
-│ Sound Devices Astral│    │ companion-module-digico- │    │ Mixing Station Tablets │
-│ (A20-Nexus / ARX32) │───▶│   astral-orchestrator    │───▶│ (Band IEM & Telemetry) │
+│ Sound Devices Astral│    │       Lynx Network       │    │ Mixing Station Tablets │
+│ (A20-Nexus / ARX32) │───▶│      (lynx-network)      │───▶│ (Band IEM & Telemetry) │
 │  + Shure/Sennheiser │    │  (Proxy Listener :8001)  │◀───│ (Multi-Client Proxy)   │
 └─────────────────────┘    └────────────┬─────────────┘    └────────────────────────┘
                                         │
@@ -97,7 +97,7 @@ npm run sim
     - **Amber**: Low battery warning ($< 20\%$)
     - **Flashing Red**: Capsule or transmitter clipping state
 - **LCD Touch Strip**:
-  - Prints focused wireless line health (`$(s21-astral:lcd_strip_headline)`), active name tags, and NexLink telemetry readouts (`$(s21-astral:lcd_strip_nexlink)`) dynamically.
+  - Prints focused wireless line health (`$(lynx-network:lcd_strip_headline)`), active name tags, and NexLink telemetry readouts (`$(lynx-network:lcd_strip_nexlink)`) dynamically.
 - **4x Contextual Rotary Encoder Dials**:
   - **Dial 1 (`dial1_ota_tx_gain`)**: OTA Transmit Gain (Sound Devices NexLink)
   - **Dial 2 (`dial2_s21_input_trim`)**: DiGiCo S21 Input Trim (`/Input_Channels/{id}/Channel_Input/trim`)
@@ -121,7 +121,7 @@ During Mode B execution, the armed Stream Deck + XL channel key flashes amber an
 
 | Path | Description |
 | --- | --- |
-| `companion/manifest.json` | Bitfocus Companion v3 module runtime manifest and product metadata |
+| `companion/manifest.json` | Bitfocus Companion v3 module runtime manifest and product metadata (`lynx-network`) |
 | `src/config.ts` | GUI configuration fields for S21 IP/Port, Astral IP/Port, Mixing Station clients, and JSON Channel-to-Fader mapping |
 | `src/main.ts` | Core `DiGiCoAstralOrchestratorInstance`, telemetry ingestion loop, restricted scribble-strip slicing, and S21 color index mapper |
 | `src/osc.ts` | Binary OSC 1.0 encoder/decoder and `DiGiCoOscProxyBroker` single-socket console multiplexer |
@@ -143,13 +143,13 @@ During Mode B execution, the armed Stream Deck + XL channel key flashes amber an
 | `npm run sim:demo` | Run self-contained live walkthrough of Astral telemetry, S21 OSC commands, and Mode A/B pedal stomps |
 | `npm run sim` | Start persistent Alpha State Stage Simulator on `:8080` (WS), `:8000` (S21 UDP), and `:9000` (Tablet UDP) |
 | `.\scripts\validate-environment.ps1` | Verify local Node.js, npm, and compiled `dist/main.js` output |
-| `.\scripts\install-companion-dev.ps1` | Build and install module into `~\companion-module-dev\companion-module-digico-astral-orchestrator` |
+| `.\scripts\install-companion-dev.ps1` | Build and install module into `~\companion-module-dev\lynx-network` |
 
 ## Documentation
 
 | Document | Purpose |
 | --- | --- |
-| [Installing Orchestrator](docs/installing-orchestrator.md) | End-to-end build, simulator verification, Companion developer placement, and gigabit switch setup |
+| [Installing Lynx Network](docs/installing-orchestrator.md) | End-to-end build, simulator verification, Companion developer placement, and gigabit switch setup |
 | [Architecture](docs/ARCHITECTURE.md) | Internal pipeline overview for wireless drivers, single-socket OSC proxy, and Dual-Mode Panic Switch |
 | [Roadmap To 1.0.0](docs/roadmap-1.0.md) | Planned milestones from `0.1.x` Alpha through `1.0.0` production release |
 | [Known Limitations](docs/known-limitations.md) | Alpha stage simulator notes, S-Series single-socket considerations, and scribble-strip limits |
@@ -172,7 +172,7 @@ Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) to get star
 
 ## Community And Support
 
-- Use [GitHub Issues](https://github.com/spectralAV/companion-module-digico-astral-orchestrator/issues/new/choose) for bug reports, feature requests, documentation updates, and hardware telemetry diagnostics.
+- Use [GitHub Issues](https://github.com/spectralAV/lynx-network/issues/new/choose) for bug reports, feature requests, documentation updates, and hardware telemetry diagnostics.
 - Support the project with an optional tip through [StreamElements](https://streamelements.com/martianost/tip).
 - Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
 - Read [SECURITY.md](SECURITY.md) before reporting a vulnerability.
@@ -182,6 +182,6 @@ Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) to get star
 
 Copyright 2026 SpectralAV.
 
-DiGiCo Astral Orchestrator is an independent open-source project and is not affiliated with, endorsed by, sponsored by, or approved by DiGiCo UK Ltd., Sound Devices, LLC, Shure Incorporated, Sennheiser electronic GmbH & Co. KG, Corsair Memory, Inc. (Elgato), Bitfocus AS, or dev-core (Mixing Station).
+Lynx Network is an independent open-source project and is not affiliated with, endorsed by, sponsored by, or approved by DiGiCo UK Ltd., Sound Devices, LLC, Shure Incorporated, Sennheiser electronic GmbH & Co. KG, Corsair Memory, Inc. (Elgato), Bitfocus AS, or dev-core (Mixing Station).
 
 Original project source code is licensed under the **Apache License, Version 2.0**. Third-party libraries and runtime dependencies (`@companion-module/base`, `ws`, `osc`, and TypeScript) remain governed by their respective upstream licenses and terms. See [LICENSE](LICENSE) and [NOTICE](NOTICE).

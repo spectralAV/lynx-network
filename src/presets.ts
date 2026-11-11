@@ -13,7 +13,7 @@ export function GetPresetsList(instance: DiGiCoAstralOrchestratorInstance): Comp
 			category: '1. Top Button Grid (Channel Arm & Telemetry)',
 			name: `Ch ${ch} (${entry.label}) Arm & Telemetry`,
 			style: {
-				text: `$(s21-astral:ch_${ch}_name)\nNL:$(s21-astral:ch_${ch}_nexlink)`,
+				text: `$(lynx-network:ch_${ch}_name)\nNL:$(lynx-network:ch_${ch}_nexlink)`,
 				size: '14',
 				color: COLORS.WHITE,
 				bgcolor: COLORS.GREEN_OK,
@@ -49,7 +49,7 @@ export function GetPresetsList(instance: DiGiCoAstralOrchestratorInstance): Comp
 		category: '2. Dual-Mode Panic Switch & Floor Pedal',
 		name: 'Disarm All / Mode A (Comms PTT)',
 		style: {
-			text: 'CLEAR ARM\n$(s21-astral:panic_mode)',
+			text: 'CLEAR ARM\n$(lynx-network:panic_mode)',
 			size: '14',
 			color: COLORS.WHITE,
 			bgcolor: COLORS.COMMS_BLUE,
@@ -83,7 +83,7 @@ export function GetPresetsList(instance: DiGiCoAstralOrchestratorInstance): Comp
 		category: '2. Dual-Mode Panic Switch & Floor Pedal',
 		name: 'Momentary Smart Foot-Switch (Stomp)',
 		style: {
-			text: 'FOOT PEDAL\nTARGET: $(s21-astral:active_panic_target)\n$(s21-astral:pedal_state)',
+			text: 'FOOT PEDAL\nTARGET: $(lynx-network:active_panic_target)\n$(lynx-network:pedal_state)',
 			size: '14',
 			color: COLORS.WHITE,
 			bgcolor: COLORS.SLATE_DARK,
@@ -129,7 +129,7 @@ export function GetPresetsList(instance: DiGiCoAstralOrchestratorInstance): Comp
 			rotaryActions: true,
 		},
 		style: {
-			text: 'DIAL 1: NEXLINK\n$(s21-astral:lcd_strip_headline)\n$(s21-astral:dial1_ota_gain)',
+			text: 'DIAL 1: NEXLINK\n$(lynx-network:lcd_strip_headline)\n$(lynx-network:dial1_ota_gain)',
 			size: '14',
 			color: COLORS.WHITE,
 			bgcolor: COLORS.SLATE_DARK,
@@ -163,7 +163,7 @@ export function GetPresetsList(instance: DiGiCoAstralOrchestratorInstance): Comp
 			rotaryActions: true,
 		},
 		style: {
-			text: 'DIAL 2: S21 TRIM\nCH $(s21-astral:focused_channel)\n$(s21-astral:dial2_s21_trim)',
+			text: 'DIAL 2: S21 TRIM\nCH $(lynx-network:focused_channel)\n$(lynx-network:dial2_s21_trim)',
 			size: '14',
 			color: COLORS.WHITE,
 			bgcolor: COLORS.SLATE_DARK,
@@ -197,7 +197,7 @@ export function GetPresetsList(instance: DiGiCoAstralOrchestratorInstance): Comp
 			rotaryActions: true,
 		},
 		style: {
-			text: 'DIAL 3: IEM AUX\n$(s21-astral:lcd_strip_nexlink)\n$(s21-astral:dial3_aux_iem)',
+			text: 'DIAL 3: IEM AUX\n$(lynx-network:lcd_strip_nexlink)\n$(lynx-network:dial3_aux_iem)',
 			size: '14',
 			color: COLORS.WHITE,
 			bgcolor: COLORS.SLATE_DARK,
@@ -231,7 +231,7 @@ export function GetPresetsList(instance: DiGiCoAstralOrchestratorInstance): Comp
 			rotaryActions: true,
 		},
 		style: {
-			text: 'DIAL 4: CUE VOL\n$(s21-astral:panic_mode)\n$(s21-astral:dial4_monitor_cue)',
+			text: 'DIAL 4: CUE VOL\n$(lynx-network:panic_mode)\n$(lynx-network:dial4_monitor_cue)',
 			size: '14',
 			color: COLORS.WHITE,
 			bgcolor: COLORS.SLATE_DARK,

@@ -1,32 +1,35 @@
 {
-	"id": "digico-astral-orchestrator",
-	"name": "digico-astral-orchestrator",
-	"shortname": "s21-astral",
-	"description": "Context-aware network broker uniting Sound Devices Astral wireless telemetry, DiGiCo S21 UDP OSC proxy control, Mixing Station tablet relays, and Stream Deck + XL tactile workflows.",
+	"id": "lynx-network",
+	"name": "Lynx Network",
+	"shortname": "lynx-network",
+	"description": "Lynx Network — Context-aware network broker uniting Sound Devices Astral wireless telemetry, DiGiCo S21 UDP OSC proxy control, Mixing Station tablet relays, and Stream Deck + XL tactile workflows.",
 	"version": "0.1.0-alpha.1",
 	"license": "Apache-2.0",
-	"repository": "https://github.com/spectralAV/companion-module-digico-astral-orchestrator.git",
-	"bugs": "https://github.com/spectralAV/companion-module-digico-astral-orchestrator/issues",
+	"repository": "https://github.com/spectralAV/lynx-network.git",
+	"bugs": "https://github.com/spectralAV/lynx-network/issues",
 	"maintainers": [
 		{
 			"name": "SpectralAV",
 			"email": "spectralav@users.noreply.github.com"
 		}
 	],
-	"legacyIds": [],
+	"legacyIds": [
+		"digico-astral-orchestrator"
+	],
 	"runtime": {
 		"type": "node18",
 		"api": "nodejs-ipc",
 		"apiVersion": "0.0.0",
 		"entrypoint": "../dist/main.js"
 	},
-	"manufacturer": "DiGiCo / Sound Devices",
+	"manufacturer": "Lynx Network (DiGiCo / Sound Devices)",
 	"products": [
 		"S21 Mixing Console",
 		"Astral A20-Nexus / ARX32",
 		"Mixing Station OSC Proxy"
 	],
 	"keywords": [
+		"Lynx Network",
 		"Audio",
 		"Mixing Console",
 		"Wireless Telemetry",

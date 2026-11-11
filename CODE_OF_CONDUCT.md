@@ -1,6 +1,6 @@
 # Code Of Conduct
 
-DiGiCo Astral Orchestrator (`companion-module-digico-astral-orchestrator`) should be a practical and respectful place for live audio engineers, RF technicians, and developers to collaborate.
+Lynx Network (`lynx-network`) should be a practical and respectful place for live audio engineers, RF technicians, and developers to collaborate.
 
 ## Expected Behavior
 
@@ -19,4 +19,3 @@ DiGiCo Astral Orchestrator (`companion-module-digico-astral-orchestrator`) shoul
 ## Enforcement
 
 Maintainers may edit, hide, lock, or remove comments and issues that violate this code. Repeated or severe violations may result in blocked participation.
-

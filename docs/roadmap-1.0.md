@@ -6,3 +6,4 @@
 | **`0.2.x` (Beta 1)** | Planned | • Bidirectional S21 console state polling and snapshot sync on startup<br>• Per-tablet Aux Send ACL filtering so stage tablets can only modify their assigned IEM bus<br>• Hardware bench validation with physical Sound Devices A20-Nexus and DiGiCo S21 |
 | **`0.5.x` (Beta 2)** | Planned | • Full hardware validation for Shure Axient Digital (`AD4D` / `AD4Q` ShowLink) and Sennheiser Digital 6000 (`EM 6000` SSC)<br>• Multi-pedal MIDI CC / USB HID direct listener option |
 | **`1.0.0` (Production)** | Planned | • Official Bitfocus Companion module store submission<br>• Redundant Astral receiver failover support and full touring showfile templates |
+

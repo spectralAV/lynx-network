@@ -1,6 +1,6 @@
 # Architecture & Protocol Reference
 
-`companion-module-digico-astral-orchestrator` operates as a multi-client, context-aware network broker and tactile state engine between RF receivers, the DiGiCo S21 mixing console, stage IEM tablets, and FOH Stream Deck + XL hardware.
+**Lynx Network** (`lynx-network`) operates as a multi-client, context-aware network broker and tactile state engine between RF receivers, the DiGiCo S21 mixing console, stage IEM tablets, and FOH Stream Deck + XL hardware.
 
 ---
 

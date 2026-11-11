@@ -32,7 +32,7 @@ function createHeadlessOrchestrator(): DiGiCoAstralOrchestratorInstance {
 	return inst
 }
 
-describe('companion-module-digico-astral-orchestrator Alpha Suite', () => {
+describe('Lynx Network (lynx-network) Alpha Suite', () => {
 	it('encodes and decodes OSC 1.0 binary packets (string, int32, float32)', () => {
 		const namePacket = encodeOscMessage('/Input_Channels/1/Channel_Input/name', [{ type: 's', value: 'VOX1 84%' }])
 		const decodedName = decodeOscMessage(namePacket)

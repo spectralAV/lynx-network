@@ -16,3 +16,4 @@
 
 - [ ] No private network credentials, tokens, or proprietary firmware files are included.
 - [ ] Legal, hardware compatibility, and known-limitation docs remain accurate.
+

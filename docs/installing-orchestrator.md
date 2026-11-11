@@ -1,6 +1,6 @@
-# Installing & Attaching DiGiCo Astral Orchestrator
+# Installing & Attaching Lynx Network
 
-This guide covers building `companion-module-digico-astral-orchestrator` from source, verifying it with the included Alpha State Stage Simulator (`mock-hardware-stage.js`), and attaching it to **Bitfocus Companion v3 / CompanionOS**.
+This guide covers building **Lynx Network** (`lynx-network`) from source, verifying it with the included Alpha State Stage Simulator (`mock-hardware-stage.js`), and attaching it to **Bitfocus Companion v3 / CompanionOS**.
 
 ---
 
@@ -16,8 +16,8 @@ This guide covers building `companion-module-digico-astral-orchestrator` from so
 ## 2. Build From Source
 
 ```powershell
-git clone https://github.com/spectralAV/companion-module-digico-astral-orchestrator.git
-cd companion-module-digico-astral-orchestrator
+git clone https://github.com/spectralAV/lynx-network.git
+cd lynx-network
 npm install
 npm run build
 ```
@@ -62,10 +62,10 @@ Run the included installer script to build and copy/link the module into your us
 ### Manual Placement (Windows / macOS / Linux / CompanionOS)
 1. Ensure `npm run build` has generated the `dist/` folder.
 2. Copy or symlink the repository folder into your Companion developer modules directory:
-   - **Windows**: `C:\Users\<Username>\companion-module-dev\companion-module-digico-astral-orchestrator`
-   - **macOS / Linux / CompanionOS**: `~/companion-module-dev/companion-module-digico-astral-orchestrator`
+   - **Windows**: `C:\Users\<Username>\companion-module-dev\lynx-network`
+   - **macOS / Linux / CompanionOS**: `~/companion-module-dev/lynx-network`
 3. Launch Bitfocus Companion (or click **Rescan Modules** in the Companion Developer settings).
-4. Add a new Connection and select **DiGiCo / Sound Devices: s21-astral** (`digico-astral-orchestrator`).
+4. Add a new Connection and select **Lynx Network (DiGiCo / Sound Devices)** (`lynx-network`).
 
 ---
 
